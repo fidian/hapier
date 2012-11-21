@@ -5,9 +5,18 @@ var loadCache, fetchCache, proto, util;
 util = require('./util');
 require('./es5-shim.js');  // Get ES5 methods
 
+
 function URI(uri, base) {
 	if (!(this instanceof URI)) {
 		return new URI(uri, base);
+	}
+
+	if (uri instanceof URI) {
+		if (base !== undefined) {
+			return new URI(uri.toString(), base);
+		}
+
+		return uri;
 	}
 
 	this.parseUri(uri);
