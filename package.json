@@ -1,0 +1,16 @@
+{
+	"name": "HAPI",
+	"version": "0.0.0",
+	"scripts": {
+		"test": "make test"
+	},
+	"dependencies": {
+	},
+	"devDependencies": {
+		"vows": "*"
+	},
+	"engines": {
+		"node": ">=0.8",
+		"npm": ">=1"
+	}
+}
