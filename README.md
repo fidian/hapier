@@ -1,5 +1,5 @@
-Hypermedia API
-==============
+Hypermedia API Employing REST
+=============================
 
 This set of libraries will assist with the interaction of a web-based API that uses a combination of [REST], [JSON Schema], [XML] and [HAL] to provide a complete solution that makes simpler and more descriptive interfaces for services.
 
@@ -11,9 +11,9 @@ This set of libraries will assist with the interaction of a web-based API that u
 Key Principles
 --------------
 
-* The RESTful service is Level 3.  This means the URIs all point to resources or sub-resources, we care and use the HTTP verbs, and the entire API is discoverable and as self-documenting as possible.
+* The RESTful service is Level 3.  This means the URIs all point to resources or sub-resources, we care and use the HTTP verbs, and the entire API is discoverable and as self-documenting as possible.  You'll really appreciate "just getting it" when you manually browse the API.
 
-* Use existing standards when possible and when they don't hinder development.
+* Use existing standards when possible and when they don't hinder development.  For instance, we use some non-IANA approved rel's for our links, but they are somewhat commonly found on the web and people can just understand what they mean and should automatically know what to do with them.
 
 Why Use This
 ------------
