@@ -15,44 +15,21 @@ util = {
 	clone: function clone(src) {
 		var target, myself;
 
-		function copy(val, index) {
-			target[index] = util.clone(val);
-		}
-
 		if (Array.isArray(src)) {
 			target = [];
-			util.each(src, copy);
+			Array.prototype.forEach.call(src, function (val, key) {
+				target[key] = val;
+			});
 		} else if (typeof src === 'object') {
 			target = {};
-			util.each(src, copy);
+			Object.keys(src).forEach(function (key) {
+				target[key] = src[key];
+			});
 		} else {
 			target = src;
 		}
 
 		return target;
-	},
-
-
-	/**
-	 * Iterate over an array or object, or maybe just call the callback
-	 * with a single value
-	 *
-	 * @param mixed thing
-	 * @param Function callback(item, index)
-	 * @param Object thisArg (optional) Contect for calling the callback
-	 */
-	each: function each(thing, callback, thisArg) {
-		var i;
-
-		if (Array.isArray(thing)) {
-			Array.prototype.forEach.call(thing, callback, thisArg);
-		} else if (typeof thing === 'object') {
-			Object.keys(thing).forEach(function (key) {
-				callback.call(thisArg, thing[key], key, thing);
-			});
-		} else if (thing !== undefined) {
-			callback.call(thisArg, thing);
-		}
 	}
 };
 
