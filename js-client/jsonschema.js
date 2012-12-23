@@ -9,10 +9,11 @@
  */
 'use strict';
 
-var SimpleNotify, URI;
+var SimpleNotify, Uri, util;
 
 SimpleNotify = require('./simplenotify');
-URI = require('./URI');
+Uri = require('./uri');
+util = require('./util');
 
 /**
  * Create a new JSONSchema object
@@ -191,17 +192,6 @@ JSONSchema.prototype.isSimpleType = function isSimpleType(type) {
 };
 
 
-JSONSchema.prototype.iterate = function iterate(object, callback, thisRef) {
-	var propName;
-
-	for (propName in object) {
-		if (Object.prototype.hasOwnProperty.call(object, propName)) {
-			callback.call(thisRef, object[propName], propName, object);
-		}
-	}
-};
-
-
 /**
  * Resolve an object, fetching additional resources as necessary.
  * The actual fetching is done by resolveSchema()
@@ -221,7 +211,7 @@ JSONSchema.prototype.resolve = function resolve(fetcher, whenDone) {
 			whenDone(err);
 		});
 
-		myself.iterate(JSONSchema.prototype.resolverMapping, function (func, propName) {
+		util.iterate(JSONSchema.prototype.resolverMapping, function (func, propName) {
 			myself.callResolverMethod(func, myself.schema, propName, fetcher, notifier);
 		});
 	}
@@ -230,7 +220,7 @@ JSONSchema.prototype.resolve = function resolve(fetcher, whenDone) {
 	// properties
 	if (this.schema.$ref) {
 		// URI resolution
-		uri = new URI(this.schema.$ref, this.schemaId);
+		uri = new Uri(this.schema.$ref, this.schemaId);
 
 		// Get the schema - this returns the correct JSON Schema object
 		// by following the URL and the pointer
@@ -384,7 +374,7 @@ JSONSchema.prototype.resolverMethods = {
 			return;
 		}
 
-		this.schema.iterate(obj[property], function (propValue, propName) {
+		util.iterate(obj[property], function (propValue, propName) {
 			myself.callResolverMethod('schema', obj[property], propName, fetcher, notifier);
 		});
 	},
@@ -433,10 +423,11 @@ JSONSchema.prototype.resolverMethods = {
 	 * These are a known type (string) or a schema or possibly a list of
 	 * known types (strings) or schemas in an array.
 	 *
-	 * Convert everything to an array for easier comparisons.
+	 * Convert everything to an array for easier comparisons.  Also, make
+	 * the items in the array unique.
 	 */
 	type: function (obj, property, fetcher, notifier) {
-		var myself;
+		var myself, unique;
 
 		myself = this;
 
@@ -449,6 +440,19 @@ JSONSchema.prototype.resolverMethods = {
 			return;
 		}
 
+		unique = [];
+		obj[property].forEach(function (item) {
+			if (!unique.some(function (uniqueItem) {
+					if (myself.compare(item, uniqueItem)) {
+						return true;
+					}
+
+					return false;
+				})) {
+				unique.push(item);
+			}
+		});
+		obj[property] = unique;
 		obj[property].forEach(function (value, key) {
 			myself.callResolverMethod('typeOrSchema', obj[key], key, fetcher, notifier);
 		});
@@ -519,7 +523,7 @@ JSONSchema.prototype.validate = function validate(data, failureCallback, path) {
 	myself = this;
 	errors = 0;
 
-	this.iterate(this.validateMethods, function (func, propName) {
+	util.iterate(this.validateMethods, function (func, propName) {
 		if (!func(myself.schema[propName], data, dataType)) {
 			// TODO: On failure, call failureCallback, maybe pass in path
 			// TODO:  Maybe stop immediately
@@ -571,7 +575,7 @@ JSONSchema.prototype.validateMethods = {
 		}
 
 		valid = true;
-		this.iterate(rule, function (subSchema, propName) {
+		util.iterate(rule, function (subSchema, propName) {
 			if (!subSchema.validate(data[propName])) {
 				valid = false;
 			}
@@ -594,11 +598,11 @@ JSONSchema.prototype.validateMethods = {
 		myself = this;
 		valid = true;
 
-		this.iterate(rule, function (subSchema, propPatternString) {
+		util.iterate(rule, function (subSchema, propPatternString) {
 			var propPattern;
 
 			propPattern = new RegExp(propPatternString);
-			myself.iterate(data, function (dataValue, dataProperty) {
+			util.iterate(data, function (dataValue, dataProperty) {
 				if (dataProperty.match(propPattern)) {
 					if (!subSchema.validate(dataValue)) {
 						valid = false;
@@ -630,7 +634,7 @@ JSONSchema.prototype.validateMethods = {
 		});
 
 		// Remove property names matching a patternProperties pattern
-		this.iterate(this.schema.patternProperties, function (subSchema, patternString) {
+		util.iterate(this.schema.patternProperties, function (subSchema, patternString) {
 			var pattern;
 
 			pattern = new RegExp(patternString);
@@ -733,7 +737,7 @@ JSONSchema.prototype.validateMethods = {
 		myself = this;
 		valid = true;
 
-		this.iterate(rule, function (propValue, propName) {
+		util.iterate(rule, function (propValue, propName) {
 			// Determine if we can skip this dependency
 			if (data[propName] === undefined) {
 				return;
