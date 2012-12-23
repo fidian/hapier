@@ -3,7 +3,6 @@
 var loadCache, fetchCache, proto, util;
 
 util = require('./util');
-require('./es5-shim.js');  // Get ES5 methods
 
 
 function URI(uri, base) {
