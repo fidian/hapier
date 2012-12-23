@@ -2,8 +2,6 @@
 
 var util;
 
-require('./es5-shim.js');
-
 util = {
 	/**
 	 * Clones an object.  Don't send a recursive object in here.
@@ -30,6 +28,23 @@ util = {
 		}
 
 		return target;
+	},
+
+	/**
+	 * Iterate across an object's properties, like Array.prototype.forEach
+	 *
+	 * @param object object
+	 * @param Function callback (value, propertyName, object)
+	 * @param object|null thisRef
+	 */
+	iterate: function iterate(object, callback, thisRef) {
+		var propName;
+
+		for (propName in object) {
+			if (Object.prototype.hasOwnProperty.call(object, propName)) {
+				callback.call(thisRef, object[propName], propName, object);
+			}
+		}
 	}
 };
 
