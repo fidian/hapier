@@ -1,3 +1,9 @@
 [submodule "3rd_party/es5-shim"]
 	path = 3rd_party/es5-shim
 	url = https://github.com/kriskowal/es5-shim.git
+[submodule "3rd_party/ICanHaz.js"]
+	path = 3rd_party/ICanHaz.js
+	url = https://github.com/andyet/ICanHaz.js.git
+[submodule "3rd_party/mustache.js"]
+	path = 3rd_party/mustache.js
+	url = https://github.com/janl/mustache.js.git
