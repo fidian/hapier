@@ -1,5 +1,15 @@
 /**
  * JSON Schema Provider object
+ *
+ * This is responsible for retrieving a JSON Schema file (raw text),
+ * converting it to a JSON object, then converting it into JSONSchema objects.
+ *
+ * Usage:
+ *
+ * var JSONSchemaProvider, provider;
+ * JSONSChemaProvider = require('./jsonschemaprovider');
+ * // Use jQuery's AJAX to fetch/parse JSON files
+ * provider = new JSONSchemaProvider(JSONSchemaProvider.jQuery);
  */
 /*global jQuery*/
 'use strict';
@@ -30,7 +40,7 @@ function JSONSchemaProvider(method) {
 
 
 /**
- * Fetch a schema with jQuery
+ * Fetch a schema (not JSONSchema object) with jQuery
  *
  * @param String uri
  * @param Function callback (err, data)
@@ -50,7 +60,7 @@ JSONSchemaProvider.jQuery = function jQuery(uri, callback) {
 
 
 /**
- * Fetch a schema using a callback if it is not already cached
+ * Fetch a schema (not JSONSchema object) and use a cache for speed.
  *
  * @param String uri May contain a hash, which this strips
  * @param Function callback (err, data)
@@ -76,13 +86,14 @@ JSONSchemaProvider.prototype.fetch = function fetch(uri, callback) {
 
 
 /**
- * Load a schema.  This consists of fetching a schema, then iterating
- * over the properties and extending/following links until the
- * schema is fully loaded.
+ * Load a schema.  This consists of:
+ *  - fetching an unprocessed schema
+ *  - iterating over the properties and filling in $ref links
+ *  - convert the raw data to JSONSchema objects
  *
  * @param string|URI uri URI of schema
  * @param string|URI baseUri Base URI for relative links (optional)
- * @param Function callback (err)
+ * @param Function callback (err, JSONSchema)
  */
 JSONSchemaProvider.prototype.load = function load(uri, baseUri, callback) {
 	var myself = this,
@@ -108,17 +119,11 @@ JSONSchemaProvider.prototype.load = function load(uri, baseUri, callback) {
 			callback(err);
 		} else {
 			js = new JSONSchema(data);
-			myself.rawCache[parsedUri] = js;
-			js.resolve(function (uri, callback) {
-				// Change scope
+			myself.processedCache[parsedUri] = js;
+			js.resolve(function fetcher(uri, callback) {
+				// Change scope and then fetch the right URI
 				myself.fetch.call(myself, uri, callback);
-			}, function (err) {
-				if (err) {
-					callback(err);
-				} else {
-					callback(null, data);
-				}
-			});
+			}, callback);
 		}
 	});
 };
