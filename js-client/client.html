@@ -1,0 +1,25 @@
+<html>
+	<head>
+		<title>HAPIER Debug Client</title>
+		<script>
+(function () {
+	var prefix = 'http';
+
+	// Detect if we are on HTTPS, with its improved security policy
+	if (window.location.toString().substr(0, 6).toLowerCase() === 'https:') {
+		prefix = 'https';
+	}
+
+	document.write('<script src="' + prefix + '://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></sc' + 'ript>');
+	document.write('<script src="' + prefix + '://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></sc' + 'ript>');
+}());
+		</script>
+		<script src="client/es5-shim.js"></script>
+		<script src="client/hapier.js"></script>
+		<script src="client/mustache.js"></script>
+		<script src="client/ICanHaz-no-mustache.js"></script>
+		<script src="client/client.js"></script>
+	</head>
+	<body>
+	</body>
+</html>
