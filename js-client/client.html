@@ -42,19 +42,19 @@
 		</script>
 		<script type="text/html" id="log_traffic">
 			{{#method}}
-			<div class="traffic_request">
+			<div class="traffic request">
 				<span name="method">{{method}}</span> <span name="url">{{url}}</span>
 			</div>
 			{{/method}}
-			<div class="traffic_headers">
+			<div class="traffic headers">
 				{{#headers}}
 				<div class="traffic_header_line">
 					<b>{{name}}:</b> <span name="{{name}}">{{value}}</span>
 				</div>
 				{{/headers}}
 			</div>
-			<div class="traffic_body">{{body}}</div>
-			<div class="traffic_body_pretty">{{pretty}}</div>
+			<div class="traffic body">{{body}}</div>
+			<div class="traffic pretty">{{pretty}}</div>
 		</script>
 		<script type="text/html" id="request_error">
 			<h1>{{status}} {{textStatus}}</h1>

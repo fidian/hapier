@@ -344,7 +344,7 @@ $(function () {
 
 		// Get the raw HTML here to avoid dropping text nodes
 		html = ich[name](data, true);
-		return $('<div>').prop('id', name).html(html);
+		return $('<div>').addClass('template').attr('name', name).html(html);
 	};
 
 

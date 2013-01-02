@@ -12,10 +12,31 @@ button {
 	font-size: inherit;
 }
 
-#start_debug_client input[name="url"] {
+.template[name="start_debug_client"] input[name="url"] {
 	width: 100%
 }
 
-.traffic_body_pretty {
-	white-space: pre
+.action {
+	margin: 0.5em;
+	border: 1px solid black;
+	background-color: #CFC;
 }
+
+.template[name="log_traffic"] {
+	margin: 0.5em;
+	border: 1px solid black;
+}
+
+.traffic.request {
+	font-style: italic;
+}
+
+.traffic.headers {
+	margin-bottom: 1em;
+}
+
+.traffic.pretty {
+	background-color: #CCF;
+	white-space: pre;
+}
+
