@@ -168,6 +168,10 @@ JSONSchema.prototype.getType = function getType(data) {
  * @return boolean True if this is a simple type
  */
 JSONSchema.prototype.isSimpleType = function isSimpleType(type) {
+	if (type === undefined) {
+		type = this.type;
+	}
+
 	if (typeof type === 'object') {
 		type = type.toString();
 	}
