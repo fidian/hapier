@@ -7,3 +7,12 @@
 [submodule "3rd_party/mustache.js"]
 	path = 3rd_party/mustache.js
 	url = https://github.com/janl/mustache.js.git
+[submodule "3rd_party/URI.js"]
+	path = 3rd_party/URI.js
+	url = https://github.com/medialize/URI.js.git
+[submodule "3rd_party/jquery-cookie"]
+	path = 3rd_party/jquery-cookie
+	url = https://github.com/carhartl/jquery-cookie.git
+[submodule "3rd_party/jquery-total-storage"]
+	path = 3rd_party/jquery-total-storage
+	url = https://github.com/jarednova/jquery-total-storage.git

@@ -18,8 +18,54 @@
 		<script src="client/hapier.js"></script>
 		<script src="client/mustache.js"></script>
 		<script src="client/ICanHaz-no-mustache.js"></script>
+		<script src="client/URI.js"></script>
+		<script src="client/jquery.cookie.js"></script>
+		<script src="client/jquery.total-storage.js"></script>
+		<script src="client/jsonFormatter.js"></script>
 		<script src="client/client.js"></script>
+		<link rel="stylesheet" href="client/client.css" />
 	</head>
 	<body>
+		<div id="page"></div>
+		<div id="lastRequest"></div>
+		<div id="lastResponse"></div>
+		<script type="text/html" id="action">
+			<div {{#id}}id="{{id}}"{{/id}} class="action">{{label}}</div>
+		</script>
+		<script type="text/html" id="error_message">
+			<div class="error_message" class="error_code_{{code}}">
+				{{#invalid_api_url}}The API URL specified is invalid.{{/invalid_api_url}}
+			</div>
+		</script>
+		<script type="text/html" id="loading">
+			<span class="loading">Loading &hellip;</span>
+		</script>
+		<script type="text/html" id="log_traffic">
+			{{#method}}
+			<div class="traffic_request">
+				<span name="method">{{method}}</span> <span name="url">{{url}}</span>
+			</div>
+			{{/method}}
+			<div class="traffic_headers">
+				{{#headers}}
+				<div class="traffic_header_line">
+					<b>{{name}}:</b> <span name="{{name}}">{{value}}</span>
+				</div>
+				{{/headers}}
+			</div>
+			<div class="traffic_body">{{body}}</div>
+			<div class="traffic_body_pretty">{{pretty}}</div>
+		</script>
+		<script type="text/html" id="request_error">
+			<h1>{{status}} {{textStatus}}</h1>
+			<p>{{errorThrown}}</p>
+		</script>
+		<script type="text/html" id="start_debug_client">
+			<form method="GET" action="?">
+				API URL:</br>
+				<input type="text" name="url"><br>
+				<button class="begin">Begin</button>
+			</form>
+		</script>
 	</body>
 </html>
