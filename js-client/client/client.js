@@ -1,8 +1,13 @@
-/*global $, document, ich, jsonFormatter, URI, window*/
+/*global $, document, ich, jsonFormatter, TemplateJQuery, URI, window*/
 
 $(function () {
 	'use strict';
-	var config, client, dcp;
+	var config, client, dcp, JSONSchemaProvider;
+
+
+	function isObject(x) {
+		return typeof x === 'object' && x !== null;
+	}
 
 
 	/**
@@ -11,7 +16,7 @@ $(function () {
 	 * @param object config Can override object's defaultConfig
 	 */
 	function DebugClient(config) {
-		if (typeof config !== 'object') {
+		if (!isObject(config)) {
 			config = {};
 		}
 
@@ -52,84 +57,103 @@ $(function () {
 	 * @return jQuery Rendered template
 	 */
 	dcp.buildActions = function buildActions(headers, content) {
-		var actions, linksName, myself, $rendered;
+		var actions, linksName, $rendered;
 
 		actions = [];
-		myself = this;
 		linksName = '_links';
 
-		if (typeof headers !== 'object') {
+		function addAction(action) {
+			actions.push(action);
+		}
+
+		if (!isObject(headers)) {
 			headers = {};
 		}
 
-		if (typeof content !== 'object') {
+		if (!isObject(content)) {
 			content = {};
 		}
 
 		// Look for links
-		if (typeof content[linksName] === 'object') {
-			Object.keys(content[linksName]).forEach(function (linkType) {
-				var links = content[linksName][linkType];
-
-				if (!Array.isArray(links)) {
-					links = [links];
-				}
-
-				links.forEach(function (linkDef) {
-					switch (linkType) {
-					case 'describedby':
-						actions.push({
-							label: 'Described By ' + linkDef.href,
-							callback: function () {
-								myself.makeRequest('GET', linkDef.href);
-							}
-						});
-						break;
+		if (isObject(content[linksName])) {
+			this.buildActionType(content[linksName].describedby, addAction, function (linkDef, addCallback) {
+				addCallback({
+					label: 'Described By ' + linkDef.href,
+					callback: function () {
+						this.makeRequest('GET', linkDef.href);
 					}
+				});
+			});
+			this.buildActionType(content[linksName].create, addAction, function (linkDef, addCallback) {
+				addCallback({
+					label: 'Create ' + linkDef.href + ' [' + linkDef.schema + ']',
+					callback: this.getFormEditFunction(linkDef)
 				});
 			});
 		}
 
 		if (headers.Location) {
-			actions.push({
+			addAction({
 				label: 'Location ' + headers.Location,
 				id: 'action_location',
 				callback: function () {
-					myself.makeRequest('GET', headers.Location);
+					this.makeRequest('GET', headers.Location);
 				}
 			});
 		}
 
 		// We can always use GET and OPTIONS
-		actions.push({
+		addAction({
 			label: 'GET ' + this.config.currentUri,
 			id: 'action_get',
 			callback: function () {
-				myself.makeRequest('GET', myself.config.currentUri);
+				this.makeRequest('GET', this.config.currentUri);
 			}
 		});
-		actions.push({
+		addAction({
 			label: 'OPTIONS ' + this.config.currentUri,
 			id: 'action_options',
 			callback: function () {
-				myself.makeRequest('OPTIONS', myself.config.currentUri);
+				this.makeRequest('OPTIONS', this.config.currentUri);
 			}
 		});
 
 		// Build template and add actions
 		$rendered = $('<div />');
 		actions.forEach(function (action) {
-			var $template;
+			var myself, $template;
 
-			$template = myself.renderTemplate('action', action);
+			myself = this;
+			$template = this.renderTemplate('action', action);
 			$template.on('click', function () {
 				action.callback.call(myself);
 				return false;
 			});
 			$rendered.append($template);
-		});
+		}, this);
 
 		return $rendered.children();
+	};
+
+
+	/**
+	 * Build a single action
+	 *
+	 * The links can be arrays or regular objects.  This function merely will
+	 * call your actionBuilder callback in a loop or once
+	 *
+	 * @param Array|object linkDef
+	 * @param Function actionBuilder(linkDef)
+	 * @param Function addCallback(action)
+	 */
+	dcp.buildActionType = function buildActionType(linkDef, addCallback, actionBuilder) {
+		if (Array.isArray(linkDef)) {
+			linkDef.forEach(function (subLinkDef) {
+				this.buildActionType(subLinkDef, addCallback, actionBuilder);
+			}, this);
+		} else if (typeof linkDef === 'object' && linkDef !== null) {
+			actionBuilder.call(this, linkDef, addCallback);
+		}
 	};
 
 
@@ -154,8 +178,53 @@ $(function () {
 		password: '',
 		requestContainer: $([]),
 		responseContainer: $([]),
+		templater: null,
 		timeout: 10000,
 		username: ''
+	};
+
+
+	/**
+	 * Return a function that is specifically for editing a form
+	 */
+	dcp.getFormEditFunction = function getFormEditFunction(linkDef) {
+		var myself = this;
+
+		return function () {
+			function schemaLoaded(err, schema) {
+				var $form, template;
+
+				if (err) {
+					myself.addError('schema_load');
+					return;
+				}
+
+				$form = $('<form>');
+				template = myself.templater.fromSchema(schema);
+				$form.append(template);
+				$form.append('<input type="submit">');
+				$form.on('submit', function () {
+					var formData;
+
+					formData = template.get();
+
+					if (template.isValid() && schema.validate(formData, function (path, code, message) {
+							myself.addError('schema_validate', {
+								path: path,
+								code: code,
+								message: message
+							});
+						})) {
+						myself.config.currentUri = linkDef.href;
+						myself.makeRequest('POST', linkDef.href, formData);
+					}
+				});
+				myself.showPage($form);
+			}
+
+			myself.showPage(myself.renderTemplate('loading'));
+			myself.config.schemaProvider.load(linkDef.schema, myself.config.currentUri, schemaLoaded);
+		};
 	};
 
 
@@ -199,7 +268,7 @@ $(function () {
 		templateData = {
 			headers: [],
 			body: payload,
-			pretty: payload
+			pretty: null
 		};
 
 		if (method) {
@@ -214,7 +283,6 @@ $(function () {
 				try {
 					JSON.parse(payload);
 					templateData.pretty = jsonFormatter(payload);
-					console.log(templateData.pretty);
 				} catch (e) {
 					// Ignore
 				}
@@ -374,7 +442,7 @@ $(function () {
 		}
 
 		$content = this.renderTemplate('request_error', templateData);
-		$content.after(this.buildActions(headers, {}));
+		$content.after(this.buildActions(headerObj, {}));
 		this.showPage($content);
 	};
 
@@ -392,7 +460,7 @@ $(function () {
 		this.logResponse(jqXHR);
 		headers = jqXHR.getAllResponseHeaders();
 		headerObj = this.parseHeaders(headers);
-		$content = this.buildActions(headers, data);
+		$content = this.buildActions(headerObj, data);
 		this.showPage($content);
 	};
 
@@ -512,10 +580,13 @@ $(function () {
 	};
 
 
+	JSONSchemaProvider = require('/jsonschemaprovider');
 	client = new DebugClient({
 		requestContainer: $('#lastRequest'),
 		responseContainer: $('#lastResponse'),
-		pageContainer: $('#page')
+		pageContainer: $('#page'),
+		schemaProvider: new JSONSchemaProvider(JSONSchemaProvider.jQuery),
+		templater: new TemplateJQuery()
 	});
 	client.startClient();
 });
