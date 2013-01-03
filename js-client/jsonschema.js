@@ -4,7 +4,6 @@
  * Create a schema object that can check validation, complete itself, etc.
  *
  * TODO:  Set 'id'
- * TODO:  Handle $ref fully
  * TODO:  Possibly handle $schema
  */
 'use strict';
@@ -123,7 +122,7 @@ JSONSchema.prototype.compare = function compare(a, b) {
 };
 
 /**
- * Gets the effective type of the data.
+ * Gets the effective type of the data, not the type from the schema.
  *
  * @param mixed data
  * @return string type
@@ -169,7 +168,7 @@ JSONSchema.prototype.getType = function getType(data) {
  */
 JSONSchema.prototype.isSimpleType = function isSimpleType(type) {
 	if (type === undefined) {
-		type = this.type;
+		type = this.schema.type;
 	}
 
 	if (typeof type === 'object') {
