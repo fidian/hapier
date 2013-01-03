@@ -45,7 +45,7 @@ function JSONSchemaProvider(method) {
  * @param String uri
  * @param Function callback (err, data)
  */
-JSONSchemaProvider.jQuery = function jQuery(uri, callback) {
+JSONSchemaProvider.jQuery = function provider_jQuery(uri, callback) {
 	jQuery.ajax(uri, {
 		accepts: 'application/vnd.hapi+json, application/json;q=0.8',
 		dataType: 'text json',
@@ -67,6 +67,7 @@ JSONSchemaProvider.jQuery = function jQuery(uri, callback) {
  */
 JSONSchemaProvider.prototype.fetch = function fetch(uri, callback) {
 	var cleanUri = uri.split('#')[0],
+		myself = this,
 		jsonPointer = uri.split('#')[1];
 
 	if (this.rawCache[cleanUri]) {
@@ -78,8 +79,8 @@ JSONSchemaProvider.prototype.fetch = function fetch(uri, callback) {
 		if (err) {
 			callback(err);
 		} else {
-			this.rawCache[cleanUri] = data;
-			this.resolvePointer(this.rawCache[cleanUri], uri, jsonPointer, callback);
+			myself.rawCache[cleanUri] = data;
+			myself.resolvePointer(myself.rawCache[cleanUri], uri, jsonPointer, callback);
 		}
 	});
 };
@@ -139,7 +140,13 @@ JSONSchemaProvider.prototype.load = function load(uri, baseUri, callback) {
  * @param Function callback
  */
 JSONSchemaProvider.prototype.resolvePointer = function resolvePointer(schema, uri, pointer, callback) {
-	var pointers = pointer.explode('/');
+	var pointers;
+
+	if (!pointer) {
+		return;
+	}
+
+	pointers = pointer.explode('/');
 
 	if (pointers[0] !== '') {
 		callback(new Error('Invalid JSON Pointer (' + pointer + ') in uri (' + uri + ')'));
