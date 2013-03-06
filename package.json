@@ -8,7 +8,8 @@
 	},
 	"devDependencies": {
 		"browserify": "*",
-		"vows": "*"
+		"vows": "*",
+		"promises-aplus-tests": "*"
 	},
 	"engines": {
 		"node": ">=0.8",
