@@ -22,6 +22,14 @@ button {
 	background-color: #CFC;
 }
 
+.error_message {
+	width: 80%;
+	margin: 1em auto;
+	padding: 2em;
+	background-color: #FAA;
+	border: 1px solid black;
+}
+
 .template[name="log_traffic"] {
 	margin: 0.5em;
 	border: 1px solid black;
@@ -36,7 +44,9 @@ button {
 }
 
 .traffic.pretty {
-	background-color: #CCF;
 	white-space: pre;
 }
 
+.template-element-string input {
+	width: 40em;
+}
