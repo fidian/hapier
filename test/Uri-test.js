@@ -180,4 +180,4 @@ batch.functional = vtools.dataProvider(function (subject) {
 	}
 });
 
-exports.batch = vows.describe('../util.js').addBatch(batch);
+exports.batch = vows.describe('../lib/Uri.js').addBatch(batch);
