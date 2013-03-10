@@ -34,7 +34,7 @@ function dataProvider(topic, tests) {
 			// the err parameter
 			testBuilt.returns = function (err, result) {
 				assert.ifError(err);
-				assert.deepEqual(scenario.returns, result);
+				assert.deepEqual(result, scenario.returns);
 			};
 		}
 
