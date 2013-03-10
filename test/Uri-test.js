@@ -84,26 +84,29 @@ batch.parseUri = vtools.dataProvider(function (uri, path) {
 	nothing: {
 		args: [ '', '' ],
 		returns: [ {
+			forceFragment: false,
 			scheme: '',
-			query: null,
-			fragment: null,
+			query: '',
+			fragment: '',
 			path: [ ]
 		}, undefined ]
 	},
 	trimming: {
 		args: [ '  http://example.com/page.html  ', '/page.html' ],
 		returns: [ {
+			forceFragment: false,
 			scheme: 'http',
-			query: null,
-			fragment: null,
+			query: '',
+			fragment: '',
 			path: [ '', 'page.html' ]
 		}, 'example.com/page.html' ]
 	},
 	'relative scheme with fragment': {
 		args: [ '//example.com/page.html#anchor', '/page.html' ],
 		returns: [ {
+			forceFragment: false,
 			scheme: '',
-			query: null,
+			query: '',
 			fragment: 'anchor',
 			path: [ '', 'page.html' ]
 		}, 'example.com/page.html' ]
@@ -111,18 +114,20 @@ batch.parseUri = vtools.dataProvider(function (uri, path) {
 	'path with fragment': {
 		args: [ '/page.html?q', undefined ],
 		returns: [ {
+			forceFragment: false,
 			scheme: '',
 			query: 'q',
-			fragment: null,
+			fragment: '',
 			path: [ '', 'page.html' ]
 		}, undefined ]
 	},
 	'relative path': {
 		args: [ '../../index.php', undefined ],
 		returns: [ {
+			forceFragment: false,
 			scheme: '',
-			query: null,
-			fragment: null,
+			query: '',
+			fragment: '',
 			path: [ '..', '..', 'index.php' ]
 		}, undefined ]
 	}
@@ -155,8 +160,16 @@ batch.schemeAndPortMatch = vtools.dataProvider(function (scheme, port) {
 });
 
 // parseUri, resolveAgainst, toString
-batch.functional = vtools.dataProvider(function (subject) {
-	this.callback(null, new Uri(subject, 'http://user@example.com:1337/d/i/r/page.html?query#fragment').toString());
+batch.functional = vtools.dataProvider(function (subject, forceFragment) {
+	var uri;
+
+	uri = new Uri(subject, 'http://user@example.com:1337/d/i/r/page.html?query#fragment');
+
+	if (forceFragment) {
+		uri.forceFragment = true;
+	}
+
+	this.callback(null, uri.toString());
 }, {
 	nothing: {
 		args: '',
@@ -165,6 +178,10 @@ batch.functional = vtools.dataProvider(function (subject) {
 	'no schema': {
 		args: '//google.com',
 		returns: 'http://google.com/'
+	},
+	'force fragment': {
+		args: [ 'http://example.com', true ],
+		returns: 'http://example.com/#'
 	},
 	'just fragment': {
 		args: '#frag2',
