@@ -6,7 +6,7 @@
 var tests, Promise, vows, assert;
 
 tests = require('promises-aplus-tests');
-Promise = require('../lib/Promise');
+Promise = require('../lib/HapierPromise');
 vows = require('vows');
 assert = require('assert');
 
@@ -25,7 +25,7 @@ var adapter = {
 	}
 };
 
-exports.batch = vows.describe('../lib/Promise.js').addBatch({
+exports.batch = vows.describe('../lib/HapierPromise.js').addBatch({
 	'a+': {
 		topic: function () {
 			var cb = this.callback;
