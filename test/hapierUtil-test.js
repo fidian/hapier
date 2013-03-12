@@ -111,6 +111,21 @@ batch.determineType = vtools.dataProvider(function (data) {
 	}
 });
 
+batch.isPrimitive = vtools.dataProvider(function (input) {
+	var result;
+	result = util.isPrimitive(input);
+	this.callback(null, result);
+}, {
+	'yes': {
+		args: 'null',
+		returns: true
+	},
+	'no': {
+		args: null,
+		returns: false
+	}
+});
+
 batch.uniqueArrayAdd = vtools.dataProvider(function (target, more) {
 	util.uniqueArrayAdd(target, more);
 	this.callback(null, target);
